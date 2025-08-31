@@ -15,7 +15,15 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: false
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'vue-router', 'pinia'],
+          elementPlus: ['element-plus', '@element-plus/icons-vue']
+        }
+      }
+    }
   },
   // 开发服务器配置
   server: {

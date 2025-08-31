@@ -54,7 +54,7 @@ fi
 
 # 构建项目
 echo "⚡ 构建生产版本..."
-npm run build:prod
+NODE_ENV=production npm run build
 
 if [ $? -eq 0 ]; then
     echo "✅ 前端构建成功"

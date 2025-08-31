@@ -2,9 +2,10 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import config from '@/config'
 
-// 配置axios基础URL
-const API_BASE_URL = 'http://localhost:8000/api'
+// 使用配置文件中的API地址
+const API_BASE_URL = config.apiBaseUrl
 
 export const useAuthStore = defineStore('auth', () => {
   // 状态

@@ -38,12 +38,6 @@ const router = createRouter({
           name: 'profile',
           component: () => import('@/views/ProfileView.vue'),
           meta: { requiresAuth: true }
-        },
-        {
-          path: '/api-test',
-          name: 'api-test',
-          component: () => import('@/views/ApiTestView.vue'),
-          meta: { requiresAuth: false }
         }
       ]
     },

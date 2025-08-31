@@ -1,6 +1,6 @@
 // 应用配置
 const config = {
-  // API 基础URL - 临时直接指向Railway后端
+  // API 基础URL - 开发环境使用Railway，生产环境使用环境变量
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'https://qd-class2-production.up.railway.app/api',
   
   // 应用信息

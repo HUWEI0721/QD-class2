@@ -31,9 +31,21 @@ git push -u origin main
 ```
 
 #### 2.3 配置GitHub Pages
+
+**方法1: 自动部署（推荐）**
 1. 仓库设置 → Pages
 2. Source 选择 "GitHub Actions"
 3. 等待自动部署完成
+
+**方法2: 手动部署（如果自动部署失败）**
+```bash
+cd frontend
+npm run deploy
+```
+
+**GitHub仓库设置要求：**
+- 确保仓库是Public（私有仓库需要Pro账户）
+- Settings → Actions → General → Workflow permissions 设置为 "Read and write permissions"
 
 #### 2.4 配置后端API
 1. 注册 [Railway](https://railway.app)

@@ -59,8 +59,8 @@
 - **Uvicorn** - ASGI 服务器
 
 ### 数据库
-- **SQLite** - 开发环境（默认）
-- **PostgreSQL** - 生产环境（可选）
+- **SQLite** - 开发环境（默认，无需额外配置）
+- **PostgreSQL** - 生产环境（Railway部署时自动配置）
 
 ## 🚀 快速开始
 
@@ -229,11 +229,21 @@ alembic upgrade head
 
 ### 生产环境部署
 
-1. 配置生产环境变量
-2. 使用 PostgreSQL 数据库
-3. 配置 Nginx 反向代理
-4. 使用 PM2 管理进程
-5. 配置 HTTPS 证书
+**推荐方式：GitHub Pages + Railway**
+
+1. **前端部署到GitHub Pages**
+   - 自动从GitHub仓库部署
+   - 免费托管静态网站
+   - 详见 `DEPLOYMENT.md`
+
+2. **后端部署到Railway**
+   - 自动配置PostgreSQL数据库
+   - 零配置部署
+   - 免费额度足够使用
+
+3. **本地开发使用SQLite**
+   - 无需额外配置
+   - 数据文件：`backend/class_website.db`
 
 ### Docker 部署（可选）
 ```bash
@@ -290,8 +300,8 @@ docker-compose up -d
 
 3. **配置环境变量**
    ```
-   DATABASE_URL=postgresql://...
-   SECRET_KEY=your-secret-key
+   # Railway会自动配置DATABASE_URL (PostgreSQL)
+   SECRET_KEY=your-secret-key-here
    ENVIRONMENT=production
    ```
 

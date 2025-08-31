@@ -51,12 +51,13 @@ npm run deploy
 1. 注册 [Railway](https://railway.app)
 2. 连接GitHub仓库
 3. 部署 `backend` 目录
-4. 添加PostgreSQL数据库
+4. Railway会自动创建PostgreSQL数据库
 5. 配置环境变量：
    ```
-   SECRET_KEY=your-secret-key
+   SECRET_KEY=your-secret-key-here
    ENVIRONMENT=production
    ```
+   💡 注意：DATABASE_URL由Railway自动配置，无需手动设置
 
 #### 2.5 更新前端API地址
 1. 获得Railway后端URL（如：`https://xxx.railway.app`）

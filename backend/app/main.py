@@ -51,4 +51,41 @@ async def root():
 # 健康检查端点
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    """健康检查端点，用于Railway部署监控"""
+    try:
+        # 简单的数据库连接测试
+        from .database import SessionLocal
+        db = SessionLocal()
+        db.execute("SELECT 1")
+        db.close()
+        
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "environment": settings.environment,
+            "version": "1.0.0"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "environment": settings.environment
+        }
+
+@app.get("/api/health")
+async def api_health_check():
+    """API健康检查端点，更详细的检查"""
+    return {
+        "status": "healthy",
+        "message": "班级建设网站API运行正常",
+        "version": "1.0.0",
+        "environment": settings.environment,
+        "endpoints": {
+            "docs": "/docs",
+            "health": "/health",
+            "auth": "/api/auth",
+            "users": "/api/users",
+            "activities": "/api/activities",
+            "media": "/api/media"
+        }
+    }

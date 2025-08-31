@@ -90,3 +90,32 @@ async def api_health_check():
             "media": "/api/media"
         }
     }
+
+@app.get("/api/public/stats")
+async def get_public_stats():
+    """获取公开的基础统计信息，不需要认证"""
+    from .database import SessionLocal
+    from .models import User, Activity, MediaItem
+    
+    db = SessionLocal()
+    try:
+        total_users = db.query(User).count()
+        total_activities = db.query(Activity).count()
+        total_media = db.query(MediaItem).count()
+        
+        return {
+            "total_users": total_users,
+            "total_activities": total_activities,
+            "total_media": total_media,
+            "status": "success"
+        }
+    except Exception as e:
+        return {
+            "total_users": 0,
+            "total_activities": 0,
+            "total_media": 0,
+            "status": "error",
+            "message": str(e)
+        }
+    finally:
+        db.close()

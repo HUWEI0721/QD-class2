@@ -1,7 +1,7 @@
 // 应用配置
 const config = {
-  // API 基础URL
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
+  // API 基础URL - 临时直接指向Railway后端
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'https://qd-class2-production.up.railway.app/api',
   
   // 应用信息
   appTitle: import.meta.env.VITE_APP_TITLE || '班级建设网站',

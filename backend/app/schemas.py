@@ -30,6 +30,7 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
     bio: Optional[str] = None
     phone: Optional[str] = None
     qq: Optional[str] = None
@@ -37,18 +38,41 @@ class UserUpdate(BaseModel):
     dormitory: Optional[str] = None
     hometown: Optional[str] = None
     avatar_url: Optional[str] = None
+    gender: Optional[str] = None
+    birthday: Optional[datetime] = None
+    interests: Optional[str] = None
+    address: Optional[str] = None
+    emergency_contact: Optional[str] = None
+    emergency_phone: Optional[str] = None
 
 
 class User(UserBase):
     id: int
     role: UserRole
     avatar_url: Optional[str] = None
+    gender: Optional[str] = None
+    birthday: Optional[datetime] = None
+    interests: Optional[str] = None
+    address: Optional[str] = None
+    emergency_contact: Optional[str] = None
+    emergency_phone: Optional[str] = None
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+    
+    @validator('new_password')
+    def validate_new_password(cls, v):
+        if len(v) < 6:
+            raise ValueError('新密码长度至少为6位')
+        return v
 
 
 class UserLogin(BaseModel):

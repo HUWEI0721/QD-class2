@@ -36,6 +36,13 @@ class User(Base):
     wechat = Column(String(50))
     dormitory = Column(String(50))
     hometown = Column(String(100))
+    # 新增字段
+    gender = Column(String(10))  # male, female, other
+    birthday = Column(DateTime)
+    interests = Column(Text)  # 兴趣爱好
+    address = Column(String(200))  # 地址
+    emergency_contact = Column(String(100))  # 紧急联系人
+    emergency_phone = Column(String(20))  # 紧急联系电话
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

@@ -72,6 +72,10 @@ export const api = {
     getAll: (params = {}) => apiClient.get('/users/', { params }),
     getById: (id) => apiClient.get(`/users/${id}`),
     updateProfile: (data) => apiClient.put('/users/me', data),
+    uploadAvatar: (formData) => apiClient.post('/users/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    changePassword: (data) => apiClient.post('/users/change-password', data),
     getStats: () => apiClient.get('/users/stats/summary')
   },
 

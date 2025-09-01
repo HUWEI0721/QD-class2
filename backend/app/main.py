@@ -193,34 +193,77 @@ async def manual_migrate_database():
         if not inspector.has_table('users'):
             return {"status": "error", "message": "users表不存在"}
         
-        existing_columns = [col['name'] for col in inspector.get_columns('users')]
-        
-        new_fields = {
-            'gender': 'VARCHAR(10)',
-            'birthday': 'TIMESTAMP',
-            'interests': 'TEXT',
-            'address': 'VARCHAR(200)',
-            'emergency_contact': 'VARCHAR(100)',
-            'emergency_phone': 'VARCHAR(20)'
+        db = SessionLocal()
+        results = {
+            "constraint_fixes": [],
+            "added_fields": [],
+            "existing_fields": [],
+            "errors": []
         }
         
-        db = SessionLocal()
-        added_fields = []
-        
         try:
+            # 1. 修复student_id唯一约束
+            try:
+                logger.info("修复student_id唯一约束...")
+                
+                # 删除唯一约束
+                result = db.execute(text("""
+                    SELECT constraint_name 
+                    FROM information_schema.table_constraints 
+                    WHERE table_name = 'users' 
+                    AND constraint_type = 'UNIQUE' 
+                    AND constraint_name LIKE '%student_id%'
+                """))
+                constraints = result.fetchall()
+                
+                for constraint in constraints:
+                    constraint_name = constraint[0]
+                    db.execute(text(f"ALTER TABLE users DROP CONSTRAINT {constraint_name}"))
+                    db.commit()
+                    results["constraint_fixes"].append(f"删除约束: {constraint_name}")
+                
+                # 删除唯一索引
+                db.execute(text("DROP INDEX IF EXISTS ix_users_student_id"))
+                db.commit()
+                results["constraint_fixes"].append("删除唯一索引: ix_users_student_id")
+                
+                # 创建普通索引
+                db.execute(text("CREATE INDEX IF NOT EXISTS idx_users_student_id ON users(student_id)"))
+                db.commit()
+                results["constraint_fixes"].append("创建普通索引: idx_users_student_id")
+                
+            except Exception as e:
+                results["errors"].append(f"修复约束失败: {str(e)}")
+            
+            # 2. 添加新字段
+            existing_columns = [col['name'] for col in inspector.get_columns('users')]
+            
+            new_fields = {
+                'gender': 'VARCHAR(10)',
+                'birthday': 'TIMESTAMP',
+                'interests': 'TEXT',
+                'address': 'VARCHAR(200)',
+                'emergency_contact': 'VARCHAR(100)',
+                'emergency_phone': 'VARCHAR(20)'
+            }
+            
             for field_name, field_type in new_fields.items():
                 if field_name not in existing_columns:
-                    sql = f"ALTER TABLE users ADD COLUMN {field_name} {field_type}"
-                    db.execute(text(sql))
-                    db.commit()
-                    added_fields.append(field_name)
-                    logger.info(f"✅ 字段 {field_name} 添加成功")
+                    try:
+                        sql = f"ALTER TABLE users ADD COLUMN {field_name} {field_type}"
+                        db.execute(text(sql))
+                        db.commit()
+                        results["added_fields"].append(field_name)
+                        logger.info(f"✅ 字段 {field_name} 添加成功")
+                    except Exception as e:
+                        results["errors"].append(f"添加字段 {field_name} 失败: {str(e)}")
+                else:
+                    results["existing_fields"].append(field_name)
             
             return {
-                "status": "success",
+                "status": "success" if not results["errors"] else "partial_success",
                 "message": "数据库迁移完成",
-                "added_fields": added_fields,
-                "existing_fields": [f for f in new_fields.keys() if f in existing_columns]
+                "results": results
             }
             
         except Exception as e:
@@ -229,7 +272,7 @@ async def manual_migrate_database():
             return {
                 "status": "error",
                 "message": f"迁移失败: {str(e)}",
-                "added_fields": added_fields
+                "results": results
             }
         finally:
             db.close()

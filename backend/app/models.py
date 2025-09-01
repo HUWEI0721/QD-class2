@@ -27,7 +27,7 @@ class User(Base):
     email = Column(String(100), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(100), nullable=False)
-    student_id = Column(String(20), unique=True, index=True)
+    student_id = Column(String(20), index=True, nullable=True)
     role = Column(Enum(UserRole), default=UserRole.STUDENT)
     avatar_url = Column(String(255))
     bio = Column(Text)

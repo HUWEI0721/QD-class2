@@ -17,6 +17,53 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def fix_unique_constraints(db):
+    """修复唯一约束问题"""
+    try:
+        logger.info("🔧 修复student_id唯一约束...")
+        
+        # 删除student_id的唯一约束
+        try:
+            result = db.execute(text("""
+                SELECT constraint_name 
+                FROM information_schema.table_constraints 
+                WHERE table_name = 'users' 
+                AND constraint_type = 'UNIQUE' 
+                AND constraint_name LIKE '%student_id%'
+            """))
+            constraints = result.fetchall()
+            
+            for constraint in constraints:
+                constraint_name = constraint[0]
+                logger.info(f"删除唯一约束: {constraint_name}")
+                db.execute(text(f"ALTER TABLE users DROP CONSTRAINT {constraint_name}"))
+                db.commit()
+                
+        except Exception as e:
+            logger.warning(f"删除约束时出错: {e}")
+            db.rollback()
+        
+        # 删除唯一索引
+        try:
+            db.execute(text("DROP INDEX IF EXISTS ix_users_student_id"))
+            db.commit()
+            logger.info("✅ 删除student_id唯一索引")
+        except Exception as e:
+            logger.warning(f"删除索引时出错: {e}")
+            db.rollback()
+        
+        # 创建普通索引
+        try:
+            db.execute(text("CREATE INDEX IF NOT EXISTS idx_users_student_id ON users(student_id)"))
+            db.commit()
+            logger.info("✅ 创建student_id普通索引")
+        except Exception as e:
+            logger.warning(f"创建索引时出错: {e}")
+            db.rollback()
+            
+    except Exception as e:
+        logger.error(f"修复约束时出错: {e}")
+
 def migrate_database():
     """在启动前执行数据库迁移"""
     try:
@@ -43,19 +90,23 @@ def migrate_database():
         # 检查并添加新字段
         inspector = inspect(engine)
         if inspector.has_table('users'):
-            existing_columns = [col['name'] for col in inspector.get_columns('users')]
-            
-            new_fields = {
-                'gender': 'VARCHAR(10)',
-                'birthday': 'TIMESTAMP',
-                'interests': 'TEXT',
-                'address': 'VARCHAR(200)',
-                'emergency_contact': 'VARCHAR(100)',
-                'emergency_phone': 'VARCHAR(20)'
-            }
-            
             db = SessionLocal()
             try:
+                # 先修复唯一约束问题
+                fix_unique_constraints(db)
+                
+                # 再添加新字段
+                existing_columns = [col['name'] for col in inspector.get_columns('users')]
+                
+                new_fields = {
+                    'gender': 'VARCHAR(10)',
+                    'birthday': 'TIMESTAMP',
+                    'interests': 'TEXT',
+                    'address': 'VARCHAR(200)',
+                    'emergency_contact': 'VARCHAR(100)',
+                    'emergency_phone': 'VARCHAR(20)'
+                }
+                
                 for field_name, field_type in new_fields.items():
                     if field_name not in existing_columns:
                         logger.info(f"添加新字段: {field_name}")

@@ -7,13 +7,21 @@ on:
 
 # 设置 GITHUB_TOKEN 的权限
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
+
+# 允许一个并发部署
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
     - name: Checkout
@@ -37,12 +45,19 @@ jobs:
         echo "🔍 构建时的环境变量:"
         echo "VITE_API_BASE_URL=$VITE_API_BASE_URL"
         npm run build
+        echo "📁 构建完成，检查文件:"
+        ls -la dist/
       env:
         VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './frontend/dist'
         
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./frontend/dist
-        force_orphan: true
+      id: deployment
+      uses: actions/deploy-pages@v4

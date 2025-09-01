@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User
 from ..schemas import User as UserSchema, UserUpdate, PasswordChange
-from ..auth import get_current_active_user, get_password_hash, verify_password
+from ..auth import get_current_active_user
 import os
 import uuid
 from ..config import settings
@@ -159,6 +159,7 @@ async def change_password(
     修改用户密码
     """
     # 验证当前密码
+    from ..auth import verify_password, get_password_hash
     if not verify_password(password_data.current_password, current_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

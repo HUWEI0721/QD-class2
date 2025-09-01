@@ -7,6 +7,10 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 
 import App from './App.vue'
 import router from './router'
+import { debugConfig } from './utils/debug.js'
+
+// 调试配置信息
+debugConfig()
 
 const app = createApp(App)
 

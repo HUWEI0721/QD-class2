@@ -34,6 +34,8 @@ jobs:
     - name: Build
       run: |
         cd frontend
+        echo "🔍 构建时的环境变量:"
+        echo "VITE_API_BASE_URL=$VITE_API_BASE_URL"
         npm run build
       env:
         VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}

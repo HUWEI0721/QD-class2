@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .config import settings
@@ -19,13 +19,24 @@ app = FastAPI(
 )
 
 # 配置CORS中间件
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# 生产环境使用更严格的CORS，开发环境允许所有来源
+if settings.environment == "production":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.allowed_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+        expose_headers=["*"]
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # 开发环境允许所有来源
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # 挂载静态文件目录
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads")
@@ -119,3 +130,17 @@ async def get_public_stats():
         }
     finally:
         db.close()
+
+# 添加OPTIONS请求处理，解决预检请求问题
+@app.options("/{path:path}")
+async def options_handler(request: Request):
+    """处理所有OPTIONS预检请求"""
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true"
+        }
+    )

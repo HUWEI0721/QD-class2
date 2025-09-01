@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>最小化测试</title>
+</head>
+<body>
+    <h1>🔧 最小化测试页面</h1>
+    <div id="info"></div>
+    
+    <script>
+        console.log('=== 最小化测试开始 ===');
+        
+        // 立即检查当前请求是否指向localhost
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            console.log('🌐 拦截到fetch请求:', args[0]);
+            if (args[0] && args[0].includes('localhost')) {
+                console.error('❌ 发现localhost请求!', args[0]);
+            }
+            return originalFetch.apply(this, args);
+        };
+        
+        // 显示基本信息
+        document.getElementById('info').innerHTML = `
+            <p><strong>当前URL:</strong> ${window.location.href}</p>
+            <p><strong>测试状态:</strong> 控制台监控已启动</p>
+            <p><strong>说明:</strong> 如果有向localhost的请求，控制台会显示红色错误</p>
+        `;
+        
+        console.log('=== 最小化测试完成 ===');
+    </script>
+</body>
+</html>

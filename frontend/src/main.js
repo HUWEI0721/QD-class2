@@ -7,10 +7,11 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 
 import App from './App.vue'
 import router from './router'
-import { debugConfig } from './utils/debug.js'
 
-// 调试配置信息
-debugConfig()
+// 简单的调试信息
+console.log('🚀 应用启动')
+console.log('环境变量 VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL)
+console.log('所有环境变量:', import.meta.env)
 
 const app = createApp(App)
 
